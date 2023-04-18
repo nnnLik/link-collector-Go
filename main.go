@@ -2,12 +2,17 @@ package main
 
 import (
 	"flag"
+	"link-collector-bot/clients/telegram"
 	"log"
 )
 
+const(
+	tgBotHost = "api.telegram.org"
+)
+
 func main() {
-	t, err = mustToken()
-}
+	tgClient := telegram.New(mustToken())
+} 
 
 func mustToken() string {
 	token := flag.String("bot-token", "", "token for accessing bot")
