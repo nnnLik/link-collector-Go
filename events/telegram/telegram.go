@@ -1,7 +1,6 @@
 package telegram
 
 import (
-	"errors"
 	"link-collector-bot/clients/telegram"
 	"link-collector-bot/events"
 	"link-collector-bot/lib/e"
@@ -18,11 +17,6 @@ type Meta struct {
 	ChatID int
 	Username string
 }
-
-var (
-	ErrUnknowEventType = errors.New("unknow event type")
-	ErrUnknowMetaType = errors.New("unknow meta type")
-)
 
 func New(client *telegram.Client, storage storage.Storage) *Processor {
 	return &Processor{
@@ -56,10 +50,9 @@ func (p *Processor) Fetch(limit int) ([]events.Event, error) {
 func (p *Processor) Process(event events.Event) error {
 	switch event.Type {
 	case events.Message:
-		p.processMessage(event)
-
+		return p.processMessage(event)
 	default:
-		return e.Wrap("can't process message", ErrUnknowEventType)
+		return e.Wrap("can't process message", e.ErrUnknowEventType)
 	}
 }
 
@@ -69,13 +62,19 @@ func (p *Processor) processMessage(event events.Event) error {
 	if err != nil {
 		return e.Wrap("can't process message", err)
 	}
+
+	if err := p.doCmd(event.Text, meta.ChatID, meta.Username); err != nil {
+		return e.Wrap("can't process message", err)
+	}
+
+	return nil
 }
 
 func meta(event events.Event) (Meta, error) {
 	result, ok := event.Meta.(Meta)
 
 	if !ok {
-		return Meta{}, e.Wrap("can't get meta", ErrUnknowMetaType)
+		return Meta{}, e.Wrap("can't get meta", e.ErrUnknowMetaType)
 	}
 	
 	return result, nil
