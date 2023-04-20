@@ -1,6 +1,15 @@
 package e
 
-import "fmt"
+import (
+	"errors"
+	"fmt"
+)
+
+var (
+	ErrUnknowEventType = errors.New("unknow event type")
+	ErrUnknowMetaType = errors.New("unknow meta type")
+	ErrNoSavedPages = errors.New("no saved pages")
+)
 
 func Wrap(msg string, err error) error {
 	return fmt.Errorf("%s: %w", msg, err)
