@@ -18,8 +18,8 @@ type Storage struct {
 
 const defaultPerm = 0774
 
-func New(basePath string) Storage {
-	return Storage{basePath: basePath}
+func New(basePath string) *Storage {
+	return &Storage{basePath: basePath}
 }
 
 func (s Storage) Save(page *storage.Page) (err error) {
@@ -62,7 +62,7 @@ func (s Storage) PickRandom(userName string) (page *storage.Page, err error) {
 	}
 
 	if len(files) == 0 {
-		return nil, storage.ErrNoSavedPages
+		return nil, e.ErrNoSavedPages
 	}
 
 	rand.Seed(time.Now().UnixNano())
