@@ -2,17 +2,33 @@ package main
 
 import (
 	"flag"
-	"link-collector-bot/clients/telegram"
+	tgClient "link-collector-bot/clients/telegram"
+	event_consumer "link-collector-bot/consumer/event-consumer"
+	"link-collector-bot/events/telegram"
+	"link-collector-bot/storage/files"
 	"log"
 )
 
 const(
 	tgBotHost = "api.telegram.org"
+	storagePath = "storage"
+	batchSize = 100
 )
 
 func main() {
-	tgClient := telegram.New(mustToken())
-} 
+	eventProcessor := telegram.New(
+		tgClient.New(tgBotHost, mustToken()),
+		files.New(storagePath),
+	)
+
+	log.Printf("server started")
+
+	consumer := event_consumer.New(eventProcessor, eventProcessor, batchSize)
+
+	if err := consumer.Start(); err != nil {
+		log.Fatal("server is crashed", err)
+	}
+}
 
 func mustToken() string {
 	token := flag.String("bot-token", "", "token for accessing bot")
@@ -22,4 +38,6 @@ func mustToken() string {
 	if *token  == "" {
 		log.Fatal("token is not specified")
 	}
+
+	return *token
 }
